@@ -5,8 +5,8 @@
   "main": "src/app.js",
   "type": "module",
   "scripts": {
-    "dev": "netlify dev",
-    "build": "node ./src/app.js",
+    "dev": "nodemon ./src/app.js",
+    "build": "node ./src/build.js",
     "start": "node ./src/app.js"
   },
   "author": "FG Soluções Web",
