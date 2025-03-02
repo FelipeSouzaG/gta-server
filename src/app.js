@@ -35,26 +35,42 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(
-  helmet.contentSecurityPolicy({
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      connectSrc: [
-        "'self'",
-        process.env.OFFICE_URL,
-        process.env.CLIENT_URL,
-        'https://viacep.com.br',
-        'https://maps.googleapis.com',
-      ],
-      imgSrc: ["'self'", 'data:'],
-      styleSrc: ["'self'", "'unsafe-inline'", 'https://cdnjs.cloudflare.com'],
-      fontSrc: ["'self'", 'https://cdnjs.cloudflare.com'],
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        connectSrc: [
+          "'self'",
+          process.env.CLIENT_URL,
+          process.env.OFFICE_URL,
+          'https://viacep.com.br',
+          'https://maps.googleapis.com'
+        ],
+        imgSrc: ["'self'", 'data:', 'https://maps.gstatic.com'],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://cdnjs.cloudflare.com'],
+        fontSrc: ["'self'", 'https://cdnjs.cloudflare.com'],
+      },
     },
   })
 );
+
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  process.env.OFFICE_URL
+];
+
 app.use(
   cors({
-    origin: [process.env.OFFICE_URL, process.env.CLIENT_URL],
+    origin: function (origin, callback) {
+      console.log('🚀 Origin recebida:', origin);
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.error('❌ Origem bloqueada por CORS:', origin);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
